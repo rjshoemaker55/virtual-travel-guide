@@ -1,0 +1,12 @@
+{
+  "name": "virtual-travel-guide",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:rjshoemaker55/virtual-travel-guide.git",
+  "author": "rjshoemaker55 <rjshoemaker55@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "inquirer": "^7.0.0",
+    "unirest": "^0.6.0"
+  }
+}
