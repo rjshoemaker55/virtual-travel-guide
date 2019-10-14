@@ -5,11 +5,6 @@ const momentDurationFormatSetup = require('moment-duration-format');
 
 momentDurationFormatSetup(moment);
 
-let req = unirest(
-  'GET',
-  'https://apidojo-kayak-v1.p.rapidapi.com/flights/create-session'
-);
-
 console.clear();
 
 const start = () => {
@@ -53,6 +48,11 @@ const flightSearch = () => {
       const searchDest = answers.destination;
       const searchDepDate = answers.departdate;
 
+      let req = unirest(
+        'GET',
+        'https://apidojo-kayak-v1.p.rapidapi.com/flights/create-session'
+      );
+
       req.query({
         origin1: searchOrigin,
         destination1: searchDest,
@@ -73,11 +73,11 @@ const flightSearch = () => {
 
         const results = res.body;
 
-        displayResults(results);
+        displayFlightResults(results);
       });
     });
 
-  const displayResults = results => {
+  const displayFlightResults = results => {
     console.clear();
 
     for (i = 0; i <= 4; i++) {
@@ -86,11 +86,6 @@ const flightSearch = () => {
       let totalDuration = moment
         .duration(trip.duration, 'minutes')
         .format('h [hours] mm [minutes]');
-
-      console.log(`
-        Flight ${i + 1} | Duration: ${totalDuration}
-        ---------------------------------------
-    `);
 
       let legs = trip.legs;
 
@@ -111,6 +106,11 @@ const flightSearch = () => {
         let duration = moment
           .duration(flightSegment.duration, 'minutes')
           .format('h [hours] mm [minutes]');
+
+        console.log(`
+        Flight ${i + 1} | Duration: ${totalDuration}
+        ---------------------------------------
+        `);
 
         console.log(`
         Segment ${sI + 1}: 
@@ -134,33 +134,112 @@ const flightSearch = () => {
   };
 };
 
-const hotelSearch = () => {
+const hotelSearch = async () => {
   console.clear();
 
-  var req = unirest(
-    'GET',
-    'https://apidojo-kayak-v1.p.rapidapi.com/hotels/create-session'
-  );
+  await inquirer
+    .prompt([
+      {
+        name: 'city',
+        type: 'input',
+        message: 'City:'
+      },
+      {
+        name: 'checkindate',
+        type: 'input',
+        message: 'Check-in Date:'
+      },
+      {
+        name: 'checkoutdate',
+        type: 'input',
+        message: 'Check-out Date:'
+      }
+    ])
+    .then(answers => {
+      const req1 = unirest(
+        'GET',
+        'https://apidojo-kayak-v1.p.rapidapi.com/locations/search'
+      );
 
-  req.query({
-    airportcode: 'HAN',
-    rooms: '1',
-    citycode: '42700',
-    checkin: '2018-12-20',
-    checkout: '2018-12-24',
-    adults: '1'
-  });
+      req1.query({
+        where: answers.city
+      });
 
-  req.headers({
-    'x-rapidapi-host': 'apidojo-kayak-v1.p.rapidapi.com',
-    'x-rapidapi-key': '2f3a0e5559mshf0b9a7a94324ff7p1bf4dajsna06e1715474c'
-  });
+      req1.headers({
+        'x-rapidapi-host': 'apidojo-kayak-v1.p.rapidapi.com',
+        'x-rapidapi-key': '2f3a0e5559mshf0b9a7a94324ff7p1bf4dajsna06e1715474c'
+      });
 
-  req.end(function(res) {
-    if (res.error) throw new Error(res.error);
+      req1.end(function(res) {
+        if (res.error) throw new Error(res.error);
+        hotelCitySearch(
+          res.body[0].ctid,
+          answers.checkindate,
+          answers.checkoutdate
+        );
+      });
+    });
 
-    console.log(res.body);
-  });
+  const hotelCitySearch = (cityId, checkInDate, checkOutDate) => {
+    let req2 = unirest(
+      'GET',
+      'https://apidojo-kayak-v1.p.rapidapi.com/hotels/create-session'
+    );
+
+    req2.query({
+      rooms: '1',
+      citycode: cityId,
+      checkin: checkInDate,
+      checkout: checkOutDate,
+      adults: '1'
+    });
+
+    req2.headers({
+      'x-rapidapi-host': 'apidojo-kayak-v1.p.rapidapi.com',
+      'x-rapidapi-key': '2f3a0e5559mshf0b9a7a94324ff7p1bf4dajsna06e1715474c'
+    });
+
+    req2.end(function(res) {
+      if (res.error) throw new Error(res.error);
+
+      displayHotelResults(res.body);
+    });
+  };
+
+  const displayHotelResults = results => {
+    console.clear();
+
+    for (i = 0; i <= 4; i++) {
+      let hotel = results.hotelset[i];
+
+      let {
+        name: hotelName,
+        displayprice: hotelPrice
+      } = hotel.cheapestProvider;
+
+      let {
+        userrating: userRating,
+        address: hotelAddress,
+        city: hotelCity,
+        country: hotelCountry
+      } = hotel;
+
+      console.log(`
+        Hotel ${i + 1} | ${hotelName}
+        ---------------------------------------`);
+
+      console.log(`
+        ${hotelAddress}
+        ${hotelCity}, ${hotelCountry}
+
+        Rating: ${userRating}
+
+        Price: ${hotelPrice}
+
+        ---------------------------------------
+    `);
+    }
+  };
 };
 
 start();
