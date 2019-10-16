@@ -205,25 +205,27 @@ const displayFlightResults = results => {
   for (i = 0; i <= 4; i++) {
     let trip = results.tripset[Object.keys(results.tripset)[i]];
 
-    let totalDuration = moment
-      .duration(trip.duration, 'minutes')
-      .format('h [hours] mm [minutes]');
+    let flightPrice = trip.displayLowTotal;
 
     let legs = trip.legs;
 
     console.log(`
-    Flight ${i + 1} | Duration: ${totalDuration}
+    Flight ${i + 1} | Price: ${flightPrice}
     ---------------------------------------
     `);
 
     legs.forEach((leg, lI) => {
+      let totalDuration = moment
+        .duration(leg.duration, 'minutes')
+        .format('h [hours] mm [minutes]');
+
       if (lI === 0) {
         console.log(`
-      Departing Fight:
+      Departing Fight | Duration: ${totalDuration}
         `);
       } else {
         console.log(`
-      Returning Flight:
+      Returning Flight: | Duration: ${totalDuration}
         `);
       }
 
