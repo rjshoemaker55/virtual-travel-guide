@@ -123,7 +123,7 @@ const hotelSearch = (
     if (res.error) throw new Error(res.error);
 
     displayHotelResults(res.body);
-    flightSearch(originAirportCode, destAirportCode, checkInDate);
+    flightSearch(originAirportCode, destAirportCode, checkInDate, checkOutDate);
   });
 };
 
@@ -159,7 +159,12 @@ const displayHotelResults = results => {
   }
 };
 
-const flightSearch = (originAirportCode, destAirportCode, departDate) => {
+const flightSearch = (
+  originAirportCode,
+  destAirportCode,
+  departDate,
+  returnDate
+) => {
   console.clear();
 
   let req = unirest(
@@ -169,8 +174,11 @@ const flightSearch = (originAirportCode, destAirportCode, departDate) => {
 
   req.query({
     origin1: originAirportCode,
+    origin2: destAirportCode,
     destination1: destAirportCode,
+    destination2: originAirportCode,
     departdate1: departDate,
+    departdate2: returnDate,
     cabin: 'e',
     currency: 'USD',
     adults: '1',
@@ -208,25 +216,36 @@ const displayFlightResults = results => {
     ---------------------------------------
     `);
 
-    legs[0].segments.forEach((segment, sI) => {
-      let flightSegment = results.segset[segment];
+    legs.forEach((leg, lI) => {
+      if (lI === 0) {
+        console.log(`
+      Departing Fight:
+        `);
+      } else {
+        console.log(`
+      Returning Flight:
+        `);
+      }
 
-      let airlineCode = flightSegment.airlineCode;
-      let airline = results.airlines[airlineCode];
-      let flightNumber = flightSegment.flightNumber;
-      let originCode = flightSegment.originCode;
-      let origin = results.airportDetails[originCode].name;
-      let originCity = results.airportDetails[originCode].city;
-      let destinationCode = flightSegment.destinationCode;
-      let destination = results.airportDetails[destinationCode].name;
-      let destinationCity = results.airportDetails[destinationCode].city;
-      let leaveTime = flightSegment.leaveTimeDisplay;
-      let arriveTime = flightSegment.arriveTimeDisplay;
-      let duration = moment
-        .duration(flightSegment.duration, 'minutes')
-        .format('h [hours] mm [minutes]');
+      legs[lI].segments.forEach((segment, sI) => {
+        let flightSegment = results.segset[segment];
 
-      console.log(`
+        let airlineCode = flightSegment.airlineCode;
+        let airline = results.airlines[airlineCode];
+        let flightNumber = flightSegment.flightNumber;
+        let originCode = flightSegment.originCode;
+        let origin = results.airportDetails[originCode].name;
+        let originCity = results.airportDetails[originCode].city;
+        let destinationCode = flightSegment.destinationCode;
+        let destination = results.airportDetails[destinationCode].name;
+        let destinationCity = results.airportDetails[destinationCode].city;
+        let leaveTime = flightSegment.leaveTimeDisplay;
+        let arriveTime = flightSegment.arriveTimeDisplay;
+        let duration = moment
+          .duration(flightSegment.duration, 'minutes')
+          .format('h [hours] mm [minutes]');
+
+        console.log(`
         Segment ${sI + 1}: 
         
         Airline: ${airline}
@@ -240,6 +259,7 @@ const displayFlightResults = results => {
 
         Duration: ${duration}
       `);
+      });
     });
     console.log(`
         ---------------------------------------
