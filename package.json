@@ -6,6 +6,8 @@
   "author": "rjshoemaker55 <rjshoemaker55@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "async": "^3.1.0",
+    "express": "^4.17.1",
     "inquirer": "^7.0.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
