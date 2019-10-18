@@ -12,9 +12,7 @@ router.get('/', async (req, res) => {
     originCity,
     destCity,
     depDate,
-    returnDate,
-    hotels: [],
-    flights: []
+    returnDate
   };
 
   const req1 = unirest(
@@ -99,10 +97,10 @@ router.get('/', async (req, res) => {
     req3.end(function(res3) {
       if (res3.error) throw new Error(res3.error);
 
-      let hotelList = [];
+      let hotelList = {};
 
-      for (i = 0; i <= 4; i++) {
-        let hotel = res3.body.hotelset[i];
+      for (hI = 0; hI <= 4; hI++) {
+        let currentHotel = res3.body.hotelset[hI];
 
         let {
           name: hotelName,
@@ -111,9 +109,9 @@ router.get('/', async (req, res) => {
           city: hotelCity,
           country: hotelCountry,
           price: hotelPrice
-        } = hotel;
+        } = currentHotel;
 
-        hotel[i] = {
+        hotel = {
           hotelName,
           userRating,
           hotelAddress,
@@ -122,8 +120,9 @@ router.get('/', async (req, res) => {
           hotelPrice
         };
 
-        hotelList.push(hotel[i]);
+        hotelList[hI] = hotel;
       }
+      responseObj['hotelList'] = hotelList;
     });
   };
 
@@ -156,14 +155,15 @@ router.get('/', async (req, res) => {
 
       const results = res4.body;
 
-      let flightList = [];
+      let flightList = {};
 
-      for (i = 0; i <= 4; i++) {
-        let trip = results.tripset[Object.keys(results.tripset)[i]];
+      for (fI = 0; fI <= 4; fI++) {
+        let trip = results.tripset[Object.keys(results.tripset)[fI]];
 
         let flightPrice = trip.displayLowTotal;
 
         let legs = trip.legs;
+        let legList = {};
 
         let flight = {
           flightPrice,
@@ -171,6 +171,8 @@ router.get('/', async (req, res) => {
         };
 
         legs.forEach((leg, lI) => {
+          let segmentList = {};
+
           let totalDuration = moment
             .duration(leg.duration, 'minutes')
             .format('h [hours] mm [minutes]');
@@ -193,29 +195,34 @@ router.get('/', async (req, res) => {
               .duration(flightSegment.duration, 'minutes')
               .format('h [hours] mm [minutes]');
 
-            flight.legs.push({
-              [sI]: {
-                airlineCode,
-                airline,
-                flightNumber,
-                originCode,
-                origin,
-                originCity,
-                destinationCode,
-                destination,
-                destinationCity,
-                leaveTime,
-                arriveTime,
-                duration
-              }
-            });
-            flightList.push(flight);
+            console.log(flight);
+            console.log(flight.legs[parseInt(lI)]);
+
+            segmentList[sI] = {
+              airlineCode,
+              airline,
+              flightNumber,
+              originCode,
+              origin,
+              originCity,
+              destinationCode,
+              destination,
+              destinationCity,
+              leaveTime,
+              arriveTime,
+              duration
+            };
           });
+          legList[lI] = segmentList;
+          flightList[fI] = legList;
         });
       }
-      res.json(flightList);
+      responseObj['flightList'] = flightList;
     });
   };
+  if (responseObj['hotelList'] && responseObj['flightList']) {
+    res.json(responseObj);
+  }
 });
 
 module.exports = router;
