@@ -220,7 +220,7 @@ router.get('/', async (req, res) => {
       responseObj['flightList'] = flightList;
     });
   };
-  if (responseObj['hotelList'] && responseObj['flightList']) {
+  while (responseObj['hotelList'] && responseObj['flightList']) {
     res.json(responseObj);
   }
 });
