@@ -1,0 +1,37 @@
+body {
+  background-image: url('../../images/Background.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  font-family: 'Karla', sans-serif;
+}
+
+.main-div {
+  margin: 200px auto !important;
+  width: 900px;
+}
+
+.main-heading {
+  font-weight: bold;
+  font-size: 70px;
+  color: white;
+}
+
+.sec-heading {
+  font-weight: bold;
+  font-size: 50px;
+  color: #1d1d1d;
+}
+
+#name-input {
+  margin-top: 20px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: #1d1d1d 5px solid;
+  border-radius: 5px;
+  background: none;
+  width: 600px;
+  font-size: 50px;
+  font-weight: bold;
+  color: #1d1d1d;
+}
