@@ -6,7 +6,7 @@
   "author": "rjshoemaker55 <rjshoemaker55@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "async": "^3.1.0",
+    "async": "^3.2.2",
     "bootstrap": "^4.3.1",
     "express": "^4.17.1",
     "inquirer": "^7.0.0",
